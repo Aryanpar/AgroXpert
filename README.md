@@ -1,113 +1,97 @@
-AgroXpert Plus
+ AgroXpert Plus – AI Powered Smart Farming System
 
-AI-Powered Plant Disease Detection & Smart Agriculture System
+![GitHub repo size](https://img.shields.io/github/repo-size/Apurva873465/AgroXpert-Plus?color=green)
+![GitHub last commit](https://img.shields.io/github/last-commit/Apurva873465/AgroXpert-Plus?color=blue)
+![GitHub issues](https://img.shields.io/github/issues/Apurva873465/AgroXpert-Plus)
+![GitHub stars](https://img.shields.io/github/stars/Apurva873465/AgroXpert-Plus?style=social)
 
-AgroXpert Plus is a complete smart farming solution integrating AI, IoT, and mobile technology to help farmers diagnose plant diseases, monitor weather, and control irrigation devices.
+🔧 Technology Stack Badges
 
-Features
-1. AI Plant Disease Detection
+![Flutter](https://img.shields.io/badge/Flutter-02569B?logo=flutter&logoColor=white)
+![Dart](https://img.shields.io/badge/Dart-0175C2?logo=dart&logoColor=white)
+![TensorFlow Lite](https://img.shields.io/badge/TensorFlow_Lite-FF6F00?logo=tensorflow&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=white)
+![Arduino](https://img.shields.io/badge/Arduino-00979D?logo=arduino&logoColor=white)
+![ESP32](https://img.shields.io/badge/ESP32-000000?logo=espressif&logoColor=white)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?logo=firebase&logoColor=black)
+![Node.js](https://img.shields.io/badge/Node.js-339933?logo=node.js&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?logo=sqlite&logoColor=white)
 
-Image-based leaf disease identification
-![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
-![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
 
-Offline TFLite model
+🌟 Overview
+AgroXpert Plus is a smart agriculture platform combining  
+**AI + IoT + Mobile App** to help farmers automate plant health monitoring, irrigation, and real-time farm analytics.
 
-Detailed treatment suggestions
 
-2. Weather Dashboard
+🚀 Features
 
-Real-time weather data
+ 🧠 AI & ML
+- Plant disease detection using TensorFlow Lite  
+- Multi-crop disease support  
+- Offline AI prediction  
+- High accuracy model  
 
-Rain prediction
+ ☁️ Weather & Environment
+- Live weather updates  
+- Rain prediction  
+- Humidity + temperature insights  
 
-Temperature, humidity, wind overview
+🤖 AI Chatbot
+- Agriculture-only chatbot  
+- Answers farming, soil, fertilizer doubts  
 
-3. Agriculture Chatbot
+🔌 IoT & ESP32 Automation
+- Control **2 motors** (Water & Fertilizer)  
+- UV Light control  
+- Real-time soil moisture  
+- Real-time humidity  
+- ESP32-CAM support  
+- Solar-powered compatible  
 
-Answers agriculture-related questions
-
-Provides plant care and farming tips
-
-Supports voice and text
-
-4. Smart Hardware Control
-
-Operates via ESP32
-
-Controls:
-
-Water motor
-
-Fertilizer motor
-
-UV light
-
-Displays sensor data:
-
-Soil moisture
-
-Temperature
-
-Humidity
-
-5. Connectivity
-
-Bluetooth or WiFi with ESP32
-
-Real-time commands & sensor updates
-
-Tech Stack
-Mobile App
-
-Flutter
-
-Dart
-
-AI / ML
-
-TensorFlow
-
-TFLite
-
-Python
-
-Backend (optional)
-
-Firebase
-
-Flask
-
-Hardware
-
-Ardiuno board
-
-Capacitive soil moisture sensor
-
-DHT11 / DHT22
-
-Motor relays
-
-Pumps and UV light
+📱 Mobile App (Flutter)
+- Disease prediction  
+- Chatbot UI  
+- Weather dashboard  
+- Sensor monitoring  
+- Motor ON/OFF controls  
+- Login + Signup system  
 
 
 
-Project Structure
-/lib
-  /screens
-  /models
-  /services
-/assets
-/android
-/ios
+🧩 Tech Stack
 
-Installation
-1. Clone repository
-git clone https://github.com/YOUR_USERNAME/AgroXpert-Plus.git
+| Layer | Technology |
+|------|------------|
+| Mobile App | Flutter |
+| AI Model | TensorFlow Lite |
+| Backend | Python, Flask/FastAPI |
+| Database | Firebase / SQLite |
+| Hardware | ESP32, DHT11, Soil Sensor |
+| Automation | Relay, Motor Pump, UV Light |
 
-2. Install dependencies
+
+
+📁 Folder Structure
+
+AgroXpert-Plus/
+├── mobile_app/
+├── ai_model/
+├── backend_api/
+├── esp32_firmware/
+├── datasets/
+└── docs/
+
+⚙️ Installation
+
+Clone repo
+
+git clone https://github.com/Apurva873465/AgroXpert-Plus.git
+
 flutter pub get
-
-3. Add .env file (not included for security)
-4. Run the app
 flutter run
+
+ Contributing
+Contributions are welcome! Fork → Edit → Pull Request.
+
+⭐ Support
+If you like this project, please **star the repo** ⭐
