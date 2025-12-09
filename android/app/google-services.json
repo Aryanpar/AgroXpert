@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "834623682294",
+    "project_id": "ttime-91668",
+    "storage_bucket": "ttime-91668.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:834623682294:android:66f2252f72e4e6f97f1ed7",
+        "android_client_info": {
+          "package_name": "Agroxpert.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJOOl5dsEiXJ3jyh5hHWxvJOfKSGsKroQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:834623682294:android:6db3c9e98a4a9f657f1ed7",
+        "android_client_info": {
+          "package_name": "com.example.aa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJOOl5dsEiXJ3jyh5hHWxvJOfKSGsKroQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:834623682294:android:650a8d7b7d5398767f1ed7",
+        "android_client_info": {
+          "package_name": "com.example.aa_new"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCJOOl5dsEiXJ3jyh5hHWxvJOfKSGsKroQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
