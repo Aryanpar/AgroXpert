@@ -45,7 +45,7 @@ AgroXpert Plus is a smart agriculture platform combining
 - UV Light control  
 - Real-time soil moisture  
 - Real-time humidity  
-- ESP32-CAM support  
+- Arduino support  
 - Solar-powered compatible  
 
 📱 Mobile App (Flutter)
@@ -66,7 +66,7 @@ AgroXpert Plus is a smart agriculture platform combining
 | AI Model | TensorFlow Lite |
 | Backend | Python, Flask/FastAPI |
 | Database | Firebase / SQLite |
-| Hardware | ESP32, DHT11, Soil Sensor |
+| Hardware | Arduino, DHT11, Soil Sensor |
 | Automation | Relay, Motor Pump, UV Light |
 
 
@@ -77,7 +77,7 @@ AgroXpert-Plus/
 ├── mobile_app/
 ├── ai_model/
 ├── backend_api/
-├── esp32_firmware/
+├── arduino_firmware/
 ├── datasets/
 └── docs/
 
