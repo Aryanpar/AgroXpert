@@ -1,16 +1,111 @@
-# aa_new
+AgroXpert Plus
 
-A new Flutter project.
+AI-Powered Plant Disease Detection & Smart Agriculture System
 
-## Getting Started
+AgroXpert Plus is a complete smart farming solution integrating AI, IoT, and mobile technology to help farmers diagnose plant diseases, monitor weather, and control irrigation devices.
 
-This project is a starting point for a Flutter application.
+Features
+1. AI Plant Disease Detection
 
-A few resources to get you started if this is your first Flutter project:
+Image-based leaf disease identification
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Offline TFLite model
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Detailed treatment suggestions
+
+2. Weather Dashboard
+
+Real-time weather data
+
+Rain prediction
+
+Temperature, humidity, wind overview
+
+3. Agriculture Chatbot
+
+Answers agriculture-related questions
+
+Provides plant care and farming tips
+
+Supports voice and text
+
+4. Smart Hardware Control
+
+Operates via ESP32
+
+Controls:
+
+Water motor
+
+Fertilizer motor
+
+UV light
+
+Displays sensor data:
+
+Soil moisture
+
+Temperature
+
+Humidity
+
+5. Connectivity
+
+Bluetooth or WiFi with ESP32
+
+Real-time commands & sensor updates
+
+Tech Stack
+Mobile App
+
+Flutter
+
+Dart
+
+AI / ML
+
+TensorFlow
+
+TFLite
+
+Python
+
+Backend (optional)
+
+Firebase
+
+Flask
+
+Hardware
+
+Ardiuno board
+
+Capacitive soil moisture sensor
+
+DHT11 / DHT22
+
+Motor relays
+
+Pumps and UV light
+
+
+
+Project Structure
+/lib
+  /screens
+  /models
+  /services
+/assets
+/android
+/ios
+
+Installation
+1. Clone repository
+git clone https://github.com/YOUR_USERNAME/AgroXpert-Plus.git
+
+2. Install dependencies
+flutter pub get
+
+3. Add .env file (not included for security)
+4. Run the app
+flutter run
