@@ -80,14 +80,7 @@ class ChatBubble extends StatelessWidget {
                     Padding(
                       padding: EdgeInsets.only(
                           bottom: imagePath != null ? 6 : 0),
-                      child: Text(
-                        text,
-                        style: GoogleFonts.poppins(
-                          fontSize: 15,
-                          color: isUser ? Colors.white : Colors.black87,
-                          height: 1.35,
-                        ),
-                      ),
+                      child: _buildTextContent(),
                     ),
                   // Image next (optional)
                   if (imagePath != null)
@@ -117,5 +110,69 @@ class ChatBubble extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildTextContent() {
+    // Clean up markdown formatting for better display
+    final cleanedText = _cleanMarkdown(text);
+    
+    return Text(
+      cleanedText,
+      style: GoogleFonts.poppins(
+        fontSize: 15,
+        color: isUser ? Colors.white : Colors.black87,
+        height: 1.35,
+      ),
+    );
+  }
+
+  String _cleanMarkdown(String text) {
+    // Remove common markdown formatting that shows as stars
+    String cleaned = text;
+    
+    // First, convert list markers at start of lines to bullet points
+    cleaned = cleaned.replaceAll(RegExp(r'^[\*\-\+]\s+', multiLine: true), '• ');
+    cleaned = cleaned.replaceAll(RegExp(r'^\d+\.\s+', multiLine: true), '');
+    
+    // Remove bold markdown (**text**)
+    cleaned = cleaned.replaceAllMapped(
+      RegExp(r'\*\*([^*]+)\*\*'),
+      (match) => match.group(1) ?? '',
+    );
+    
+    // Remove code blocks (```code```)
+    cleaned = cleaned.replaceAll(RegExp(r'```[\s\S]*?```'), '');
+    
+    // Remove inline code (`code`)
+    cleaned = cleaned.replaceAllMapped(
+      RegExp(r'`([^`]+)`'),
+      (match) => match.group(1) ?? '',
+    );
+    
+    // Remove headers (# Header)
+    cleaned = cleaned.replaceAll(RegExp(r'^#{1,6}\s+', multiLine: true), '');
+    
+    // Remove links [text](url) but keep the text
+    cleaned = cleaned.replaceAllMapped(
+      RegExp(r'\[([^\]]+)\]\([^\)]+\)'),
+      (match) => match.group(1) ?? '',
+    );
+    
+    // Remove italic markdown (*text*) - only if it's not a bullet point
+    // Match *text* where * is not at start of line
+    cleaned = cleaned.replaceAllMapped(
+      RegExp(r'([^\n\*])\*([^*\n]+)\*([^\n\*])'),
+      (match) => '${match.group(1)}${match.group(2)}${match.group(3)}',
+    );
+    
+    // Remove standalone asterisks in the middle of sentences
+    cleaned = cleaned.replaceAll(RegExp(r'([^\s\*])\*([^\s\*])'), r'$1 $2');
+    
+    // Clean up extra whitespace
+    cleaned = cleaned.replaceAll(RegExp(r'\n{3,}'), '\n\n');
+    cleaned = cleaned.replaceAll(RegExp(r' {2,}'), ' ');
+    cleaned = cleaned.trim();
+    
+    return cleaned;
   }
 }

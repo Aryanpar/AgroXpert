@@ -22,12 +22,21 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController passwordController = TextEditingController();
 
   bool isLoading = false;
+  bool isSocialLoading = false;
 
   // ---------------- GOOGLE LOGIN -----------------
   Future<void> _signInWithGoogle() async {
+    if (isSocialLoading) return;
+    setState(() => isSocialLoading = true);
     try {
+      // Clear any previous Google session to avoid stale tokens causing failures.
+      await GoogleSignIn().signOut();
+
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-      if (googleUser == null) return; // cancelled by user
+      if (googleUser == null) {
+        if (mounted) setState(() => isSocialLoading = false);
+        return; // cancelled by user
+      }
 
       final GoogleSignInAuthentication googleAuth =
           await googleUser.authentication;
@@ -39,45 +48,76 @@ class _LoginScreenState extends State<LoginScreen> {
 
       await FirebaseAuth.instance.signInWithCredential(credential);
 
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const DashboardScreen()),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Google sign-in failed: $e')),
-      );
+      if (mounted) {
+        String errorMessage = 'Google sign-in failed: $e';
+        if (e.toString().contains('ApiException: 10')) {
+          errorMessage = 'Google Sign-In not configured. Please add SHA-1 fingerprint to Firebase Console.';
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => isSocialLoading = false);
     }
   }
 
   // ---------------- FACEBOOK LOGIN -----------------
   Future<void> _signInWithFacebook() async {
+    if (isSocialLoading) return;
+    setState(() => isSocialLoading = true);
     try {
       final LoginResult result = await FacebookAuth.instance.login();
 
       if (result.status == LoginStatus.success) {
         final OAuthCredential credential =
-            FacebookAuthProvider.credential(result.accessToken!.token);
+            FacebookAuthProvider.credential(result.accessToken!.tokenString);
 
         await FirebaseAuth.instance.signInWithCredential(credential);
 
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const DashboardScreen()),
         );
       } else if (result.status == LoginStatus.cancelled) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Facebook login cancelled')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Facebook login cancelled')),
+          );
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Facebook login failed: ${result.message}')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text('Facebook login failed: ${result.message}')),
+          );
+        }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Facebook login error: $e')),
-      );
+      if (mounted) {
+        String errorMessage = 'Facebook login error: $e';
+        if (e.toString().contains('FacebookAppId') || e.toString().contains('YOUR_FACEBOOK_APP_ID')) {
+          errorMessage = 'Facebook App ID not configured. Please update strings.xml with your Facebook App ID.';
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => isSocialLoading = false);
     }
   }
 
@@ -127,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Text(
                 'Welcome Back',
                 style: const TextStyle(
-                  fontSize: 24,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
@@ -190,15 +230,15 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             const SizedBox(height: 24),
             SocialButton(
-              text: 'Google',
+              text: isSocialLoading ? 'Please wait...' : 'Google',
               icon: Icons.g_mobiledata,
-              onPressed: _signInWithGoogle,
+              onPressed: isSocialLoading ? () {} : _signInWithGoogle,
             ),
             const SizedBox(height: 12),
             SocialButton(
-              text: 'Facebook',
+              text: isSocialLoading ? 'Please wait...' : 'Facebook',
               icon: Icons.facebook,
-              onPressed: _signInWithFacebook,
+              onPressed: isSocialLoading ? () {} : _signInWithFacebook,
             ),
             const SizedBox(height: 24),
             Center(

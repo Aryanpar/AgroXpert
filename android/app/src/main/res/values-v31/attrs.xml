@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fix for flutter_bluetooth_serial lStar attribute issue -->
+    <attr name="lStar" format="float" />
+</resources>
+

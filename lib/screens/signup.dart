@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
+import 'package:google_sign_in/google_sign_in.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/social_button.dart';
 import 'id_verification.dart';
@@ -19,6 +21,107 @@ class _SignupScreenState extends State<SignupScreen> {
   final TextEditingController passwordController = TextEditingController();
 
   bool isLoading = false;
+  bool isSocialLoading = false;
+
+  // ---------------- GOOGLE SIGNUP (SOCIAL LOGIN) -----------------
+  Future<void> _signUpWithGoogle() async {
+    if (isSocialLoading) return;
+    setState(() => isSocialLoading = true);
+    try {
+      // Clear any previous Google session to avoid stale tokens causing failures.
+      await GoogleSignIn().signOut();
+
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        if (mounted) setState(() => isSocialLoading = false);
+        return; // cancelled by user
+      }
+
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      await FirebaseAuth.instance.signInWithCredential(credential);
+
+      // After social sign‑up, continue to ID verification flow
+      if (!mounted) return;
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const IDVerificationScreen()),
+      );
+    } catch (e) {
+      if (mounted) {
+        String errorMessage = 'Google sign-in failed: $e';
+        if (e.toString().contains('ApiException: 10')) {
+          errorMessage = 'Google Sign-In not configured. Please add SHA-1 fingerprint to Firebase Console.';
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => isSocialLoading = false);
+    }
+  }
+
+  // ---------------- FACEBOOK SIGNUP (SOCIAL LOGIN) -----------------
+  Future<void> _signUpWithFacebook() async {
+    if (isSocialLoading) return;
+    setState(() => isSocialLoading = true);
+    try {
+      final LoginResult result = await FacebookAuth.instance.login();
+
+      if (result.status == LoginStatus.success) {
+        final OAuthCredential credential =
+            FacebookAuthProvider.credential(result.accessToken!.tokenString);
+
+        await FirebaseAuth.instance.signInWithCredential(credential);
+
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+              builder: (context) => const IDVerificationScreen()),
+        );
+      } else if (result.status == LoginStatus.cancelled) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Facebook login cancelled')),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content:
+                    Text('Facebook login failed: ${result.message ?? ''}')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        String errorMessage = 'Facebook login error: $e';
+        if (e.toString().contains('FacebookAppId') || e.toString().contains('YOUR_FACEBOOK_APP_ID')) {
+          errorMessage = 'Facebook App ID not configured. Please update strings.xml with your Facebook App ID.';
+        }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMessage),
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => isSocialLoading = false);
+    }
+  }
 
   Future<void> _signup() async {
     setState(() => isLoading = true);
@@ -63,6 +166,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF9FAFB),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
@@ -119,15 +223,15 @@ class _SignupScreenState extends State<SignupScreen> {
             ),
             const SizedBox(height: 24),
             SocialButton(
-              text: 'Google',
+              text: isSocialLoading ? 'Please wait...' : 'Google',
               icon: Icons.g_mobiledata,
-              onPressed: () {},
+              onPressed: isSocialLoading ? () {} : _signUpWithGoogle,
             ),
             const SizedBox(height: 12),
             SocialButton(
-              text: 'Facebook',
+              text: isSocialLoading ? 'Please wait...' : 'Facebook',
               icon: Icons.facebook,
-              onPressed: () {},
+              onPressed: isSocialLoading ? () {} : _signUpWithFacebook,
             ),
             const SizedBox(height: 24),
             Center(

@@ -7,7 +7,7 @@ plugins {
 
 android {
     namespace = "com.example.aa_new"
-    compileSdk = 35
+    compileSdk = 36
     ndkVersion = "29.0.14033849"
 
     // Add TensorFlow Lite AAR files directory
@@ -27,15 +27,24 @@ android {
 
     defaultConfig {
         applicationId = "com.example.aa_new"
-        minSdk = 23
-        targetSdk = 35
+        minSdk = flutter.minSdkVersion
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+        manifestPlaceholders["appAuthRedirectScheme"] = "fb1220475616667912"
+
     }
 
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("debug")
+            // Disable minification to avoid R8 issues with TensorFlow Lite
+            isMinifyEnabled = false
+            isShrinkResources = false
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
         }
     }
 }

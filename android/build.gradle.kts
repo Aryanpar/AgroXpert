@@ -33,6 +33,7 @@ subprojects {
         plugins.withId("com.android.library") {
             extensions.configure<LibraryExtension>("android") {
                 namespace = "io.github.edufolly.flutterbluetoothserial"
+                compileSdk = 36
             }
         }
     }

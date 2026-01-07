@@ -1,4 +1,5 @@
 import 'package:aa_new/screens/chat_ai_screen.dart';
+import 'package:aa_new/screens/chat_history_screen.dart';
 import 'package:aa_new/screens/profile_screen.dart';
 import 'package:aa_new/screens/disease_detection_screen.dart';
 import 'package:aa_new/screens/about_screen.dart';
@@ -11,6 +12,7 @@ import '../services/bluetooth_service_stub.dart'
     if (dart.library.io) '../services/bluetooth_service.dart';
 import 'package:flutter/foundation.dart';
 import 'login.dart';
+import '../utils/app_localizations.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -48,16 +50,54 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool isMotor2On = false;
   bool isUVLightOn = false;
 
+  bool _hasShownBtDialog = false;
+
   @override
   void initState() {
     super.initState();
     currentUser = FirebaseAuth.instance.currentUser;
     _fetchWeather();
-    // Auto-connect to HC-05 after first frame on supported platforms (non-web)
+    // Show Bluetooth connection dialog after first frame (non-web)
     if (!kIsWeb) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        _ensureBtConnected();
+        _showBluetoothConnectionDialog();
       });
+    }
+  }
+
+  /// Show a single dialog asking user if they want to connect to Bluetooth
+  Future<void> _showBluetoothConnectionDialog() async {
+    if (_hasShownBtDialog || _bt.isConnected || !mounted) return;
+    _hasShownBtDialog = true;
+
+    if (!mounted) return;
+    final shouldConnect = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context).bluetoothConnection),
+        content: Text(
+          AppLocalizations.of(context).bluetoothConnectPrompt,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(AppLocalizations.of(context).skip),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF4CAF50),
+              foregroundColor: Colors.white,
+            ),
+            child: Text(AppLocalizations.of(context).connectNow),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldConnect == true && mounted) {
+      await _ensureBtConnected();
     }
   }
 
@@ -67,34 +107,107 @@ class _DashboardScreenState extends State<DashboardScreen> {
     try {
       await _bt.connect(name: 'HC-05');
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Bluetooth: Connected to HC-05')),
+        _showBluetoothResultDialog(
+          success: true,
+          message: 'Successfully connected to HC-05',
         );
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Bluetooth connect failed: $e')));
+        String errorMsg = 'Failed to connect to HC-05';
+        if (e.toString().contains('not paired')) {
+          errorMsg = 'HC-05 device not paired. Please pair it in system settings first.';
+        } else if (e.toString().contains('Bluetooth')) {
+          errorMsg = 'Bluetooth error: ${e.toString().split(':').last.trim()}';
+        }
+        _showBluetoothResultDialog(success: false, message: errorMsg);
       }
     } finally {
       if (mounted) setState(() => _btConnecting = false);
     }
   }
 
+  /// Show a single dialog for Bluetooth connection result
+  void _showBluetoothResultDialog({required bool success, required String message}) {
+    if (!mounted) return;
+    final app = AppLocalizations.of(context);
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(
+              success ? Icons.check_circle : Icons.error,
+              color: success ? Colors.green : Colors.red,
+              size: 28,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(success ? app.success : app.connectionFailed),
+            ),
+          ],
+        ),
+        content: Text(message),
+        actions: [
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: success ? const Color(0xFF4CAF50) : Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(app.ok),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<bool> _sendBt(String cmd) async {
     try {
       if (!_bt.isConnected) {
-        await _ensureBtConnected();
+        // Show dialog if not connected instead of auto-connecting
+        if (mounted) {
+          final shouldConnect = await showDialog<bool>(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: Text(AppLocalizations.of(context).bluetoothConnection),
+              content: Text(
+                AppLocalizations.of(context).bluetoothNotConnected,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(false),
+                  child: Text(AppLocalizations.of(context).cancel),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.of(context).pop(true),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF4CAF50),
+                    foregroundColor: Colors.white,
+                  ),
+                  child: Text(AppLocalizations.of(context).connectNow),
+                ),
+              ],
+            ),
+          );
+          if (shouldConnect == true) {
+            await _ensureBtConnected();
+          } else {
+            return false;
+          }
+        }
       }
       if (_bt.isConnected) {
         await _bt.send(cmd);
         return true;
       }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Bluetooth send failed: $e')));
+      if (mounted) {
+        _showBluetoothResultDialog(
+          success: false,
+          message: 'Failed to send command: ${e.toString().split(':').last.trim()}',
+        );
+      }
     }
     return false;
   }
@@ -152,12 +265,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       setState(() => _isLoadingWeather = false);
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text("Failed to load weather: $e")));
+      ).showSnackBar(SnackBar(content: Text("${AppLocalizations.of(context).failedToLoadWeather}: $e")));
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final app = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: _buildAppBar(),
@@ -169,10 +283,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   /// ✅ AppBar
   AppBar _buildAppBar() {
+    final app = AppLocalizations.of(context);
     return AppBar(
-      title: const Text(
-        "AgroXpert Plus",
-        style: TextStyle(fontWeight: FontWeight.bold),
+      title: Text(
+        app.appTitle,
+        style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       backgroundColor: Colors.green.shade600,
       leading: Builder(
@@ -182,28 +297,37 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
       ),
       actions: [
-        IconButton(icon: const Icon(Icons.refresh), onPressed: _fetchWeather),
+        IconButton(
+          icon: const Icon(Icons.refresh),
+          onPressed: _fetchWeather,
+          tooltip: app.refreshWeather,
+        ),
         Padding(
-          padding: const EdgeInsets.only(right: 12),
+          padding: const EdgeInsets.only(right: 8),
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 isOnline ? Icons.circle : Icons.circle_outlined,
-                color: isOnline ? Colors.green : Colors.red,
-                size: 16,
+                color: isOnline ? Colors.greenAccent : Colors.redAccent,
+                size: 12,
               ),
-              const SizedBox(width: 4),
+              const SizedBox(width: 6),
               Text(
-                isOnline ? "Online" : "Offline",
+                isOnline ? app.online : app.offline,
                 style: const TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: FontWeight.w500,
                   color: Colors.white,
                 ),
               ),
+              const SizedBox(width: 4),
               Switch(
                 value: isOnline,
                 activeColor: Colors.white,
+                activeTrackColor: Colors.greenAccent,
+                inactiveThumbColor: Colors.white,
+                inactiveTrackColor: Colors.grey,
                 onChanged: (value) => setState(() => isOnline = value),
               ),
             ],
@@ -215,6 +339,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   /// ✅ Drawer
   Drawer _buildDrawer() {
+    final app = AppLocalizations.of(context);
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
@@ -241,7 +366,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.person),
-            title: const Text('Profile'),
+          title: Text(app.profile),
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
@@ -252,7 +377,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.info),
-            title: const Text('About'),
+          title: Text(app.about),
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
@@ -263,7 +388,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.health_and_safety),
-            title: const Text('Disease Detection'),
+          title: Text(app.diseaseDetection),
             onTap: () {
               Navigator.pop(context);
               Navigator.push(
@@ -276,17 +401,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           ListTile(
             leading: const Icon(Icons.history),
-            title: const Text('AI History'),
+          title: Text(app.aiChatHistory),
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("AI History clicked")),
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ChatHistoryScreen(),
+                ),
               );
             },
           ),
           const Divider(),
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Logout', style: TextStyle(color: Colors.red)),
+          title: Text(app.logout, style: const TextStyle(color: Colors.red)),
             onTap: () async {
               Navigator.pop(context);
               await FirebaseAuth.instance.signOut();
@@ -930,9 +1059,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         "UV Light Control",
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                         ),

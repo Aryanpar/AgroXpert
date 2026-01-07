@@ -1,15 +1,21 @@
 // lib/screens/chat_ai_screen.dart
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:uuid/uuid.dart';
 
 import '../services/ai_service.dart';
+import '../services/chat_history_service.dart';
+import '../models/chat_history.dart';
 import '../widgets/chat_bubble.dart';
+import 'chat_history_screen.dart';
+import '../utils/app_localizations.dart';
 
 class ChatAIScreen extends StatefulWidget {
-  const ChatAIScreen({Key? key}) : super(key: key);
+  final ChatHistory? history;
+  
+  const ChatAIScreen({Key? key, this.history}) : super(key: key);
 
   @override
   State<ChatAIScreen> createState() => _ChatAIScreenState();
@@ -21,14 +27,27 @@ class _ChatAIScreenState extends State<ChatAIScreen> {
   final List<Map<String, String?>> _messages = [];
   bool _isTyping = false;
   File? _selectedImage;
-
+  String? _chatId;
+  String? _chatTitle;
+  final ChatHistoryService _historyService = ChatHistoryService();
   final ImagePicker _picker = ImagePicker();
 
   @override
-  void dispose() {
-    _controller.dispose();
-    _scrollController.dispose();
-    super.dispose();
+  void initState() {
+    super.initState();
+    if (widget.history != null) {
+      _chatId = widget.history!.id;
+      _chatTitle = widget.history!.title;
+      _messages.addAll(
+        widget.history!.messages.map((m) => {
+          'role': m.role,
+          'text': m.text,
+          'image': m.imagePath,
+        }),
+      );
+    } else {
+      _chatId = const Uuid().v4();
+    }
   }
 
   Future<void> _pickImage() async {
@@ -57,6 +76,12 @@ class _ChatAIScreenState extends State<ChatAIScreen> {
 
     _scrollToBottom();
 
+    // Generate title from first message if not set
+    if (_chatTitle == null && text.isNotEmpty) {
+      _chatTitle = _historyService.generateTitle(text);
+    }
+
+    final app = AppLocalizations.of(context);
     String reply;
     try {
       if (imagePath != null) {
@@ -65,7 +90,7 @@ class _ChatAIScreenState extends State<ChatAIScreen> {
         reply = await AIService().sendPrompt(text);
       }
     } catch (e) {
-      reply = "⚠️ Error: $e";
+      reply = "⚠️ ${app.chatError}: $e";
     }
 
     if (!mounted) return;
@@ -76,6 +101,37 @@ class _ChatAIScreenState extends State<ChatAIScreen> {
     });
 
     _scrollToBottom();
+    
+    // Save conversation to history
+    _saveConversation();
+  }
+
+  Future<void> _saveConversation() async {
+    if (_messages.isEmpty) return;
+    
+    final chatMessages = _messages.map((m) => ChatMessage(
+      role: m['role']!,
+      text: m['text'] ?? '',
+      imagePath: m['image'],
+    )).toList();
+
+    final history = ChatHistory(
+      id: _chatId!,
+      title: _chatTitle ?? 'New Chat',
+      createdAt: widget.history?.createdAt ?? DateTime.now(),
+      updatedAt: DateTime.now(),
+      messages: chatMessages,
+    );
+
+    await _historyService.saveHistory(history);
+  }
+
+  @override
+  void dispose() {
+    _saveConversation();
+    _controller.dispose();
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _scrollToBottom() {
@@ -91,6 +147,7 @@ class _ChatAIScreenState extends State<ChatAIScreen> {
   }
 
   Widget _buildInput() {
+    final app = AppLocalizations.of(context);
     return SafeArea(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -164,7 +221,7 @@ class _ChatAIScreenState extends State<ChatAIScreen> {
                     textCapitalization: TextCapitalization.sentences,
                     style: GoogleFonts.poppins(),
                     decoration: InputDecoration(
-                      hintText: "Ask AgroXpert AI...",
+                      hintText: app.askHint,
                       hintStyle: GoogleFonts.poppins(color: Colors.grey[500]),
                       border: InputBorder.none,
                     ),
@@ -275,6 +332,7 @@ class _ChatAIScreenState extends State<ChatAIScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final app = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       appBar: AppBar(
@@ -293,13 +351,36 @@ class _ChatAIScreenState extends State<ChatAIScreen> {
               children: [
                 IconButton(
                   icon: const Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: () {
+                    _saveConversation();
+                    Navigator.pop(context);
+                  },
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  "AgroXpert AI Assistant",
-                  style: GoogleFonts.poppins(
-                      fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white),
+                Expanded(
+                  child: Text(
+                    _chatTitle ?? app.aiAssistant,
+                    style: GoogleFonts.poppins(
+                        fontSize: 20, fontWeight: FontWeight.w600, color: Colors.white),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.history, color: Colors.white),
+                  onPressed: () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ChatHistoryScreen(),
+                      ),
+                    );
+                    // Reload if history was opened
+                    if (widget.history != null && mounted) {
+                      // Could reload history here if needed
+                    }
+                  },
+                  tooltip: app.chatHistoryTooltip,
                 ),
               ],
             ),
@@ -308,15 +389,8 @@ class _ChatAIScreenState extends State<ChatAIScreen> {
       ),
       body: Stack(
         children: [
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/chat_bg.png'),
-                fit: BoxFit.cover,
-                opacity: 0.03,
-              ),
-            ),
-          ),
+          // Simple background; removed missing asset to avoid runtime crash
+          Container(),
           Column(
             children: [
               Expanded(

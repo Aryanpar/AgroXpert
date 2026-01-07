@@ -57,30 +57,35 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final languageProvider = Provider.of<LanguageProvider>(context);
-    
     return MaterialApp(
-      title: 'AgroXpert Plus',
-      theme: ThemeData(
-        primaryColor: const Color(0xFF4CAF50),
-        scaffoldBackgroundColor: Colors.white,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      debugShowCheckedModeBanner: false,
-      locale: languageProvider.currentLocale,
-      supportedLocales: const [
-        Locale('en'), // English
-        Locale('hi'), // Hindi
-        Locale('gu'), // Gujarati
-        Locale('mr'), // Marathi
-      ],
-      localizationsDelegates: const [
-        AppLocalizationsDelegate(),
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      home: const AuthGate(),
-    );
+  title: 'AgroXpert Plus',
+  theme: ThemeData(
+    primaryColor: const Color(0xFF4CAF50),
+    scaffoldBackgroundColor: Colors.white,
+    visualDensity: VisualDensity.adaptivePlatformDensity,
+  ),
+  debugShowCheckedModeBanner: false,
+
+  // 🔥 Language switching works here
+  locale: languageProvider.currentLocale,
+
+  supportedLocales: const [
+    Locale('en'),
+    Locale('hi'),
+    Locale('gu'),
+    Locale('mr'),
+  ],
+
+  localizationsDelegates: const [
+    AppLocalizationsDelegate(),
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ],
+
+  home: const AuthGate(),
+);
+
   }
 }
 

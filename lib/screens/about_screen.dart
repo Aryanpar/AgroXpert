@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import '../utils/app_localizations.dart';
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
@@ -21,27 +22,23 @@ class _AboutScreenState extends State<AboutScreen> {
   final List<_FeatureInfo> _features = const [
     _FeatureInfo(
       icon: Icons.search,
-      title: "AI Disease Scan",
-      description:
-      "Scan leaves and detect diseases early.",
+      titleKey: 'featureAiScanTitle',
+      descriptionKey: 'featureAiScanDesc',
     ),
     _FeatureInfo(
       icon: Icons.water_drop,
-      title: "Smart Irrigation",
-      description:
-      "Control irrigation motors from the app.",
+      titleKey: 'featureIrrigationTitle',
+      descriptionKey: 'featureIrrigationDesc',
     ),
     _FeatureInfo(
       icon: Icons.timeline,
-      title: "Live Monitoring",
-      description:
-      "View soil and environment data in real time.",
+      titleKey: 'featureMonitoringTitle',
+      descriptionKey: 'featureMonitoringDesc',
     ),
     _FeatureInfo(
       icon: Icons.cloud,
-      title: "Weather Aware",
-      description:
-      "Use weather data for better decisions.",
+      titleKey: 'featureWeatherTitle',
+      descriptionKey: 'featureWeatherDesc',
     ),
   ];
 
@@ -75,6 +72,7 @@ class _AboutScreenState extends State<AboutScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final app = AppLocalizations.of(context);
     final Color primary = Colors.green.shade600;
     const Color background = Color(0xFFF2F4F7);
 
@@ -84,9 +82,9 @@ class _AboutScreenState extends State<AboutScreen> {
         elevation: 0,
         backgroundColor: primary,
         foregroundColor: Colors.white,
-        title: const Text(
-          "About AgroXpert Plus",
-          style: TextStyle(
+        title: Text(
+          app.aboutTitle,
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 18,
           ),
@@ -115,7 +113,7 @@ class _AboutScreenState extends State<AboutScreen> {
               const SizedBox(height: 24),
 
               // 👨‍💻 DEVELOPERS
-              const _SectionTitle(title: "Developers"),
+              _SectionTitle(title: app.developers),
               const SizedBox(height: 10),
 
               _DeveloperCard(
@@ -160,7 +158,7 @@ class _AboutScreenState extends State<AboutScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const _SectionTitle(title: "Key Features"),
+                    _SectionTitle(title: app.keyFeatures),
                     const SizedBox(height: 10),
                     SizedBox(
                       height: 210,
@@ -184,8 +182,8 @@ class _AboutScreenState extends State<AboutScreen> {
                                   curve: Curves.easeOut,
                                   child: _FeatureCard(
                                     icon: feature.icon,
-                                    title: feature.title,
-                                    description: feature.description,
+                                    title: _resolveFeatureTitle(app, feature.titleKey),
+                                    description: _resolveFeatureDesc(app, feature.descriptionKey),
                                   ),
                                 );
                               },
@@ -230,19 +228,19 @@ class _AboutScreenState extends State<AboutScreen> {
                 depth: _scrollOffset,
                 start: 280,
                 end: 550,
-                child: const Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _SectionTitle(title: "How to use"),
-                    SizedBox(height: 10),
+                    _SectionTitle(title: app.howToUse),
+                    const SizedBox(height: 10),
                     _StepTimeline(
                       steps: [
-                        "Power on the Arduino Uno, sensors, and relays.",
-                        "Connect the system to the configured WiFi/Bluetooth.",
-                        "Open the dashboard to see live soil and environment data.",
-                        "Use irrigation buttons to start or stop the motor.",
-                        "Open Disease Scan and capture a clear plant image.",
-                        "Review AI suggestions and past logs in the history screen.",
+                        app.howStep1,
+                        app.howStep2,
+                        app.howStep3,
+                        app.howStep4,
+                        app.howStep5,
+                        app.howStep6,
                       ],
                     ),
                   ],
@@ -256,12 +254,12 @@ class _AboutScreenState extends State<AboutScreen> {
                 depth: _scrollOffset,
                 start: 420,
                 end: 750,
-                child: const Column(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _SectionTitle(title: "Use cases & advantages"),
-                    SizedBox(height: 10),
-                    _UseCasesAdvantagesCard(),
+                    _SectionTitle(title: app.useCases),
+                    const SizedBox(height: 10),
+                    const _UseCasesAdvantagesCard(),
                   ],
                 ),
               ),
@@ -269,7 +267,7 @@ class _AboutScreenState extends State<AboutScreen> {
               const SizedBox(height: 30),
               Center(
                 child: Text(
-                  "Version 1.0.1  •  Final Year Project",
+                  app.versionInfo,
                   style: TextStyle(
                     fontSize: 13,
                     color: Colors.grey.shade700,
@@ -283,6 +281,36 @@ class _AboutScreenState extends State<AboutScreen> {
         ),
       ),
     );
+  }
+
+  String _resolveFeatureTitle(AppLocalizations app, String key) {
+    switch (key) {
+      case 'featureAiScanTitle':
+        return app.featureAiScanTitle;
+      case 'featureIrrigationTitle':
+        return app.featureIrrigationTitle;
+      case 'featureMonitoringTitle':
+        return app.featureMonitoringTitle;
+      case 'featureWeatherTitle':
+        return app.featureWeatherTitle;
+      default:
+        return '';
+    }
+  }
+
+  String _resolveFeatureDesc(AppLocalizations app, String key) {
+    switch (key) {
+      case 'featureAiScanDesc':
+        return app.featureAiScanDesc;
+      case 'featureIrrigationDesc':
+        return app.featureIrrigationDesc;
+      case 'featureMonitoringDesc':
+        return app.featureMonitoringDesc;
+      case 'featureWeatherDesc':
+        return app.featureWeatherDesc;
+      default:
+        return '';
+    }
   }
 }
 
@@ -472,13 +500,13 @@ class _SectionTitle extends StatelessWidget {
 
 class _FeatureInfo {
   final IconData icon;
-  final String title;
-  final String description;
+  final String titleKey;
+  final String descriptionKey;
 
   const _FeatureInfo({
     required this.icon,
-    required this.title,
-    required this.description,
+    required this.titleKey,
+    required this.descriptionKey,
   });
 }
 

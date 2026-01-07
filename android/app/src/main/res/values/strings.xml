@@ -1,5 +1,6 @@
 <resources>
   <string name="app_name">AgroXpert Plus</string>
-  <string name="facebook_app_id">YOUR_FACEBOOK_APP_ID</string>
-  <string name="facebook_client_token">YOUR_FACEBOOK_CLIENT_TOKEN</string>
+  <string name="facebook_app_id">1220475616667912</string>
+  <string name="facebook_client_token">b03159d72a0ed1e4ba2557acb5ca0668</string>
+  <string name="fb_login_protocol_scheme">fb1220475616667912</string>
 </resources>
