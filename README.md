@@ -9,7 +9,7 @@
 
 ## 📱 Download App
 
-[![Download APK](https://img.shields.io/badge/Download-APK-green?style=for-the-badge\&logo=android)](https://github.com/Apurva873465/AgroXpert-Plus/releases)
+[![Download APK](https://img.shields.io/badge/Download-APK-green?style=for-the-badge\&logo=android)](https://github.com/Aryanpar/AgroXpert/releases/tag/v.0.1)
 
 > Install the latest APK and start using AgroXpert Plus instantly.
 
