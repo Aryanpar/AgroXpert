@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 
 import '../models/weather.dart';
 import '../services/weather_service.dart';
+import '../services/agro_context_service.dart';
+import '../widgets/smart_tip_card.dart';
 import '../services/bluetooth_service_stub.dart'
     if (dart.library.io) '../services/bluetooth_service.dart';
 import 'package:flutter/foundation.dart';
@@ -26,6 +28,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String selectedCity = "Vadodara";
   User? currentUser;
   final BluetoothService _bt = BluetoothService();
+  final AgroContextService _contextService = AgroContextService();
   bool _btConnecting = false;
 
   final List<String> cities = [
@@ -213,21 +216,50 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _toggleMotor1() async {
+    final app = AppLocalizations.of(context);
     final cmd = isMotor1On ? 'B' : 'A';
     final ok = await _sendBt(cmd);
-    if (ok) setState(() => isMotor1On = !isMotor1On);
+    if (ok) {
+      setState(() => isMotor1On = !isMotor1On);
+      // Update context service
+      _contextService.updateMotorStatus(app.motor1Sprayer, isMotor1On);
+      // Show success toast
+      _showMotorToast(app.motor1Sprayer, isMotor1On);
+    }
   }
 
   Future<void> _toggleMotor2() async {
+    final app = AppLocalizations.of(context);
     final cmd = isMotor2On ? 'D' : 'C';
     final ok = await _sendBt(cmd);
-    if (ok) setState(() => isMotor2On = !isMotor2On);
+    if (ok) {
+      setState(() => isMotor2On = !isMotor2On);
+      // Update context service
+      _contextService.updateMotorStatus(app.motor2Irrigation, isMotor2On);
+      // Show success toast
+      _showMotorToast(app.motor2Irrigation, isMotor2On);
+    }
   }
 
   Future<void> _toggleUV() async {
     final cmd = isUVLightOn ? 'l' : 'L';
     final ok = await _sendBt(cmd);
     if (ok) setState(() => isUVLightOn = !isUVLightOn);
+  }
+
+  /// Show success feedback when motor is toggled
+  void _showMotorToast(String motorName, bool isOn) {
+    final app = AppLocalizations.of(context);
+    final action = isOn ? app.startingMotor : app.stoppingMotor;
+    final message = '${isOn ? '✅' : '⏹️'} ${app.motorCommandSent}: $action $motorName...';
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isOn ? Colors.green : Colors.orange,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   /// 🌦 Fetch Weather
@@ -261,6 +293,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _forecast = forecast;
         _isLoadingWeather = false;
       });
+      
+      // Update context service with weather data and city name
+      _contextService.updateWeather(weather, cityName: selectedCity);
     } catch (e) {
       setState(() => _isLoadingWeather = false);
       ScaffoldMessenger.of(
@@ -302,35 +337,36 @@ class _DashboardScreenState extends State<DashboardScreen> {
           onPressed: _fetchWeather,
           tooltip: app.refreshWeather,
         ),
+        // Profile Avatar
         Padding(
-          padding: const EdgeInsets.only(right: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                isOnline ? Icons.circle : Icons.circle_outlined,
-                color: isOnline ? Colors.greenAccent : Colors.redAccent,
-                size: 12,
-              ),
-              const SizedBox(width: 6),
-              Text(
-                isOnline ? app.online : app.offline,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.white,
-                ),
-              ),
-              const SizedBox(width: 4),
-              Switch(
-                value: isOnline,
-                activeColor: Colors.white,
-                activeTrackColor: Colors.greenAccent,
-                inactiveThumbColor: Colors.white,
-                inactiveTrackColor: Colors.grey,
-                onChanged: (value) => setState(() => isOnline = value),
-              ),
-            ],
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ProfileScreen()),
+              );
+            },
+            child: CircleAvatar(
+              radius: 16,
+              backgroundColor: Colors.white,
+              backgroundImage: currentUser?.photoURL != null
+                  ? NetworkImage(currentUser!.photoURL!)
+                  : null,
+              child: currentUser?.photoURL == null
+                  ? Text(
+                      (currentUser?.displayName != null &&
+                              currentUser!.displayName!.isNotEmpty)
+                          ? currentUser!.displayName![0].toUpperCase()
+                          : "U",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.green.shade600,
+                      ),
+                    )
+                  : null,
+            ),
           ),
         ),
       ],
@@ -441,6 +477,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 12),
             if (isOnline) ...[
               _buildWeatherCard(),
+              const SizedBox(height: 16),
+              // Smart Recommendation Card
+              _buildSmartTipCard(),
               const SizedBox(height: 16),
               _buildWindSpeedCard(),
               const SizedBox(height: 16),
@@ -787,6 +826,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return icons[random % icons.length];
   }
 
+  /// 💡 Smart Recommendation Card
+  Widget _buildSmartTipCard() {
+    if (_weather == null) {
+      return const SizedBox.shrink();
+    }
+    
+    final recommendation = _contextService.getSmartRecommendation();
+    
+    return SmartTipCard(
+      recommendation: recommendation,
+      onActionTap: recommendation.action != null
+          ? () {
+              // Handle motor activation
+              final motorName = recommendation.action!.motorName;
+              if (motorName.contains('Motor 1')) {
+                _toggleMotor1();
+              } else if (motorName.contains('Motor 2')) {
+                _toggleMotor2();
+              }
+            }
+          : null,
+    );
+  }
+
   /// 🌬 Wind Speed Card
   Widget _buildWindSpeedCard() {
     return Card(
@@ -824,34 +887,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       mainAxisSpacing: 12,
       childAspectRatio: 0.85, // Adjusted aspect ratio to prevent overflow
       children: [
-        _buildMetricCard(
-          "Soil Moisture",
-          "Sensor Not Connected ",
-          "normal",
-          Icons.water_drop,
-          Colors.green,
-        ),
-        _buildMetricCard(
-          "Tank Level",
-          "79%",
-          "good",
-          Icons.storage,
-          Colors.blue,
-        ),
-        _buildMetricCard(
-          "System Health",
-          "65%",
-          "good",
-          Icons.health_and_safety,
-          Colors.orange,
-        ),
-        _buildMetricCard(
-          "Battery Level",
-          "86%",
-          "perfect",
-          Icons.battery_charging_full,
-          Colors.green,
-        ),
         _buildEnhancedMotorCard("Motor 1", isMotor1On, Colors.green, () async {
           await _toggleMotor1();
         }),
@@ -1291,9 +1326,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             FloatingActionButton.extended(
               heroTag: 'aiButton',
               onPressed: () {
+                // Open chat with context pre-loaded
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ChatAIScreen()),
+                  MaterialPageRoute(
+                    builder: (context) => const ChatAIScreen(loadContext: true),
+                  ),
                 );
               },
               backgroundColor: Colors.green.shade600,

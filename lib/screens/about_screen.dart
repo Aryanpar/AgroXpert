@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../utils/app_localizations.dart';
+import 'profile_screen.dart';
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
@@ -14,8 +16,9 @@ class _AboutScreenState extends State<AboutScreen> {
   double _scrollOffset = 0.0;
 
   // ====== FEATURE CAROUSEL ======
-  final PageController _featureController =
-  PageController(viewportFraction: 0.82);
+  final PageController _featureController = PageController(
+    viewportFraction: 0.82,
+  );
   int _featurePage = 0;
   Timer? _featureTimer;
 
@@ -84,11 +87,49 @@ class _AboutScreenState extends State<AboutScreen> {
         foregroundColor: Colors.white,
         title: Text(
           app.aboutTitle,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ProfileScreen(),
+                  ),
+                );
+              },
+              child: StreamBuilder<User?>(
+                stream: FirebaseAuth.instance.authStateChanges(),
+                builder: (context, snapshot) {
+                  final currentUser = snapshot.data;
+                  return CircleAvatar(
+                    radius: 16,
+                    backgroundColor: Colors.white,
+                    backgroundImage: currentUser?.photoURL != null
+                        ? NetworkImage(currentUser!.photoURL!)
+                        : null,
+                    child: currentUser?.photoURL == null
+                        ? Text(
+                            (currentUser?.displayName != null &&
+                                    currentUser!.displayName!.isNotEmpty)
+                                ? currentUser!.displayName![0].toUpperCase()
+                                : "U",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green.shade600,
+                            ),
+                          )
+                        : null,
+                  );
+                },
+              ),
+            ),
+          ),
+        ],
       ),
       body: NotificationListener<ScrollNotification>(
         onNotification: (scroll) {
@@ -117,10 +158,29 @@ class _AboutScreenState extends State<AboutScreen> {
               const SizedBox(height: 10),
 
               _DeveloperCard(
+                name: "Apurva Patel",
+                role: "Hardware & AI/ML Integration",
+                description:
+                    "Handled Arduino Uno hardware setup, sensor interfacing, and relay-based irrigation control. Integrated AI/ML plant disease detection and enabled Bluetooth (HC-05) communication for real-time monitoring through the mobile app.",
+                skills: const [
+                  "Arduino Uno",
+                  "C/C++",
+                  "Circuit Design",
+                  "AI/ML Integration",
+                  "Bluetooth (HC-05)",
+                  "Power Management",
+                  "Sensors & Relays",
+                ],
+                // photo: "assets/images/co_dev.png", // Image not available
+              ),
+
+              const SizedBox(height: 16),
+
+              _DeveloperCard(
                 name: "Aryan Parmar",
                 role: "App Developer • UI/UX • IoT Integration",
                 description:
-                "Leads the mobile app, user experience, and bridges data between Arduino Uno hardware and the app.",
+                    "Leads the mobile app, user experience, and bridges data between Arduino Uno hardware and the app.",
                 skills: const [
                   "Flutter",
                   "UI/UX",
@@ -128,24 +188,7 @@ class _AboutScreenState extends State<AboutScreen> {
                   "Sensors & Relays",
                   "Firebase",
                 ],
-                photo: "assets/images/aryan.png",
-              ),
-
-              const SizedBox(height: 16),
-
-              _DeveloperCard(
-                name: "Apurva Patel",
-                role: "Hardware & System Design",
-                description:
-                "Focuses on Arduino Uno coding, wiring, sensor calibration and relay-based irrigation control.",
-                skills: const [
-                  "Arduino Uno",
-                  "C/C++",
-                  "Circuit Design",
-                  "Soil Sensors",
-                  "Relay & Pump Control",
-                ],
-                photo: "assets/images/co_dev.png",
+                // photo: "assets/images/aryan.png", // Image not available
               ),
 
               const SizedBox(height: 26),
@@ -177,13 +220,18 @@ class _AboutScreenState extends State<AboutScreen> {
 
                                 return AnimatedScale(
                                   scale: isActive ? 1.0 : 0.94,
-                                  duration:
-                                  const Duration(milliseconds: 250),
+                                  duration: const Duration(milliseconds: 250),
                                   curve: Curves.easeOut,
                                   child: _FeatureCard(
                                     icon: feature.icon,
-                                    title: _resolveFeatureTitle(app, feature.titleKey),
-                                    description: _resolveFeatureDesc(app, feature.descriptionKey),
+                                    title: _resolveFeatureTitle(
+                                      app,
+                                      feature.titleKey,
+                                    ),
+                                    description: _resolveFeatureDesc(
+                                      app,
+                                      feature.descriptionKey,
+                                    ),
                                   ),
                                 );
                               },
@@ -192,27 +240,23 @@ class _AboutScreenState extends State<AboutScreen> {
                           const SizedBox(height: 8),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(
-                              _features.length,
-                                  (index) {
-                                final bool isActive =
-                                    index == _featurePage;
-                                return AnimatedContainer(
-                                  duration: const Duration(
-                                      milliseconds: 220),
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 3),
-                                  width: isActive ? 16 : 8,
-                                  height: 8,
-                                  decoration: BoxDecoration(
-                                    color: isActive
-                                        ? primary
-                                        : Colors.grey.shade300,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                );
-                              },
-                            ),
+                            children: List.generate(_features.length, (index) {
+                              final bool isActive = index == _featurePage;
+                              return AnimatedContainer(
+                                duration: const Duration(milliseconds: 220),
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 3,
+                                ),
+                                width: isActive ? 16 : 8,
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  color: isActive
+                                      ? primary
+                                      : Colors.grey.shade300,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                              );
+                            }),
                           ),
                         ],
                       ),
@@ -314,6 +358,13 @@ class _AboutScreenState extends State<AboutScreen> {
   }
 }
 
+String _getInitials(String name) {
+  final parts = name.trim().split(RegExp(r'\s+'));
+  if (parts.isEmpty) return '';
+  if (parts.length == 1) return parts[0][0].toUpperCase();
+  return '${parts[0][0]}${parts[1][0]}'.toUpperCase();
+}
+
 /// Wraps a child and adjusts its opacity / slight translate based on scroll depth.
 class _DepthWrapper extends StatelessWidget {
   final double depth;
@@ -338,10 +389,7 @@ class _DepthWrapper extends StatelessWidget {
 
     return Opacity(
       opacity: opacity,
-      child: Transform.translate(
-        offset: Offset(0, offsetY),
-        child: child,
-      ),
+      child: Transform.translate(offset: Offset(0, offsetY), child: child),
     );
   }
 }
@@ -376,10 +424,7 @@ class _AnimatedHeroSection extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
             gradient: LinearGradient(
-              colors: [
-                primary,
-                primary.withOpacity(0.9),
-              ],
+              colors: [primary, primary.withOpacity(0.9)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -461,8 +506,7 @@ class _InfoChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding:
-      const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.18),
         borderRadius: BorderRadius.circular(20),
@@ -488,10 +532,7 @@ class _SectionTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       title,
-      style: const TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.w800,
-      ),
+      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
     );
   }
 }
@@ -614,11 +655,7 @@ class _StepTimeline extends StatelessWidget {
                   ),
                 ),
                 if (!isLast)
-                  Container(
-                    width: 2,
-                    height: 30,
-                    color: Colors.green.shade200,
-                  ),
+                  Container(width: 2, height: 30, color: Colors.green.shade200),
               ],
             ),
             const SizedBox(width: 10),
@@ -627,10 +664,7 @@ class _StepTimeline extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 3, bottom: 12),
                 child: Text(
                   steps[index],
-                  style: const TextStyle(
-                    fontSize: 14,
-                    height: 1.6,
-                  ),
+                  style: const TextStyle(fontSize: 14, height: 1.6),
                 ),
               ),
             ),
@@ -701,10 +735,17 @@ class _DeveloperCard extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 30,
-              backgroundColor: Colors.green.shade50,
+              backgroundColor: Colors.green.shade100,
               backgroundImage: photo != null ? AssetImage(photo!) : null,
               child: photo == null
-                  ? Icon(Icons.person, color: primary, size: 28)
+                  ? Text(
+                      _getInitials(name),
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: primary,
+                      ),
+                    )
                   : null,
             ),
             const SizedBox(width: 14),
@@ -741,8 +782,7 @@ class _DeveloperCard extends StatelessWidget {
                   Wrap(
                     spacing: 8,
                     runSpacing: 6,
-                    children:
-                    skills.map((s) => _SkillChip(label: s)).toList(),
+                    children: skills.map((s) => _SkillChip(label: s)).toList(),
                   ),
                 ],
               ),
@@ -818,11 +858,19 @@ class _DeveloperPopup extends StatelessWidget {
                     // photo
                     CircleAvatar(
                       radius: 55,
-                      backgroundColor: Colors.grey.shade200,
-                      backgroundImage:
-                      photo != null ? AssetImage(photo!) : null,
+                      backgroundColor: Colors.green.shade100,
+                      backgroundImage: photo != null
+                          ? AssetImage(photo!)
+                          : null,
                       child: photo == null
-                          ? Icon(Icons.person, size: 50, color: primary)
+                          ? Text(
+                              _getInitials(name),
+                              style: TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                                color: primary,
+                              ),
+                            )
                           : null,
                     ),
                     const SizedBox(height: 14),
@@ -930,18 +978,14 @@ class _SkillChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding:
-      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: const Color(0xFFE8F5E9),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Text(
         label,
-        style: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
+        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -978,10 +1022,7 @@ class _UseCasesAdvantagesCard extends StatelessWidget {
               children: const [
                 Text(
                   "Use cases",
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                 ),
                 SizedBox(height: 6),
                 _BulletRow(text: "Small and medium farms."),
@@ -990,10 +1031,7 @@ class _UseCasesAdvantagesCard extends StatelessWidget {
                 SizedBox(height: 12),
                 Text(
                   "Advantages",
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
                 ),
                 SizedBox(height: 6),
                 _BulletRow(text: "Saves time and manual checks."),
@@ -1063,8 +1101,7 @@ class _BulletRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding:
-      const EdgeInsets.symmetric(vertical: 3),
+      padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1072,10 +1109,7 @@ class _BulletRow extends StatelessWidget {
           Expanded(
             child: Text(
               text,
-              style: const TextStyle(
-                fontSize: 13.5,
-                height: 1.5,
-              ),
+              style: const TextStyle(fontSize: 13.5, height: 1.5),
             ),
           ),
         ],

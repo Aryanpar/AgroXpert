@@ -33,6 +33,7 @@ dependencies:
   shared_preferences: ^2.2.2
   share_plus: ^7.2.1
   uuid: ^4.3.3
+  flutter_markdown: ^0.7.7+1
   
 
 dev_dependencies:

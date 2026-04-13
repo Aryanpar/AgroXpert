@@ -1,12 +1,13 @@
-// lib/screens/chat_ai_screen.dart
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:uuid/uuid.dart';
+import '../utils/platform_utils.dart';
 
 import '../services/ai_service.dart';
 import '../services/chat_history_service.dart';
+import '../services/agro_context_service.dart';
 import '../models/chat_history.dart';
 import '../widgets/chat_bubble.dart';
 import 'chat_history_screen.dart';
@@ -14,8 +15,13 @@ import '../utils/app_localizations.dart';
 
 class ChatAIScreen extends StatefulWidget {
   final ChatHistory? history;
+  final bool loadContext; // New parameter to load context automatically
   
-  const ChatAIScreen({Key? key, this.history}) : super(key: key);
+  const ChatAIScreen({
+    Key? key,
+    this.history,
+    this.loadContext = false,
+  }) : super(key: key);
 
   @override
   State<ChatAIScreen> createState() => _ChatAIScreenState();
@@ -25,8 +31,9 @@ class _ChatAIScreenState extends State<ChatAIScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final List<Map<String, String?>> _messages = [];
+  final AgroContextService _contextService = AgroContextService();
   bool _isTyping = false;
-  File? _selectedImage;
+  XFile? _selectedImage;
   String? _chatId;
   String? _chatTitle;
   final ChatHistoryService _historyService = ChatHistoryService();
@@ -48,13 +55,59 @@ class _ChatAIScreenState extends State<ChatAIScreen> {
     } else {
       _chatId = const Uuid().v4();
     }
+    
+    // 3. AI CHAT INJECTION - Load context automatically if requested
+    if (widget.loadContext && _messages.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadContextAndSend();
+      });
+    }
+  }
+
+  /// Load agro context and send it automatically to AI
+  Future<void> _loadContextAndSend() async {
+    final contextPrompt = _contextService.getChatContextPrompt();
+    
+    setState(() {
+      _messages.add({
+        'role': 'user',
+        'text': contextPrompt,
+        'image': null,
+      });
+      _isTyping = true;
+    });
+
+    _scrollToBottom();
+
+    // Generate title
+    if (_chatTitle == null) {
+      _chatTitle = 'Disease Consultation';
+    }
+
+    final app = AppLocalizations.of(context);
+    String reply;
+    try {
+      reply = await AIService().sendPrompt(contextPrompt);
+    } catch (e) {
+      reply = "⚠️ ${app.chatError}: $e";
+    }
+
+    if (!mounted) return;
+
+    setState(() {
+      _messages.add({'role': 'ai', 'text': reply});
+      _isTyping = false;
+    });
+
+    _scrollToBottom();
+    _saveConversation();
   }
 
   Future<void> _pickImage() async {
     try {
       final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
       if (pickedFile != null) {
-        setState(() => _selectedImage = File(pickedFile.path));
+        setState(() => _selectedImage = pickedFile);
       }
     } catch (e) {
       print("Error picking image: $e");
@@ -84,8 +137,8 @@ class _ChatAIScreenState extends State<ChatAIScreen> {
     final app = AppLocalizations.of(context);
     String reply;
     try {
-      if (imagePath != null) {
-        reply = await AIService().sendImage(File(imagePath));
+      if (_selectedImage != null) {
+        reply = await AIService().sendImage(_selectedImage!);
       } else {
         reply = await AIService().sendPrompt(text);
       }
@@ -159,8 +212,8 @@ class _ChatAIScreenState extends State<ChatAIScreen> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(14),
-                    child: Image.file(
-                      _selectedImage!,
+                    child: platformImage(
+                      _selectedImage!.path,
                       height: 120,
                       width: double.infinity,
                       fit: BoxFit.contain,
@@ -298,7 +351,7 @@ class _ChatAIScreenState extends State<ChatAIScreen> {
             children: [
               Center(
                 child: InteractiveViewer(
-                  child: Image.file(File(imagePath), fit: BoxFit.contain),
+                  child: platformImage(imagePath, fit: BoxFit.contain),
                 ),
               ),
               if (text.isNotEmpty)

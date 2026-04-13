@@ -43,8 +43,10 @@ class AppLocalizations {
       'online': 'Online',
       'offline': 'Offline',
       'bluetoothConnection': 'Bluetooth Connection',
-      'bluetoothConnectPrompt': 'Would you like to connect to HC-05 Bluetooth device?',
-      'bluetoothNotConnected': 'Bluetooth is not connected. Would you like to connect now?',
+      'bluetoothConnectPrompt':
+          'Would you like to connect to HC-05 Bluetooth device?',
+      'bluetoothNotConnected':
+          'Bluetooth is not connected. Would you like to connect now?',
       'connectionFailed': 'Connection Failed',
       'success': 'Success',
       'connectNow': 'Connect',
@@ -115,6 +117,20 @@ class AppLocalizations {
       'prevention': 'Prevention',
       'treatment': 'Treatment',
       'noTreatmentDetails': 'No treatment details available.',
+
+      // smart features
+      'smartRecommendation': 'Smart Recommendation',
+      'waitingForWeather': 'Waiting for weather data...',
+      'highHumidity': 'High Humidity: Risk of Fungal spread is HIGH. Suggesting Motor 1 (Sprayer) activation.',
+      'extremeHeat': 'Extreme Heat: Increase irrigation frequency via Motor 2.',
+      'lowHumidity': 'Low Humidity: Consider activating irrigation to maintain soil moisture.',
+      'conditionsStable': 'Conditions Stable: Continue regular monitoring.',
+      'activateMotor': 'Activate',
+      'motorCommandSent': 'Command Sent to Field Node',
+      'startingMotor': 'Starting',
+      'stoppingMotor': 'Stopping',
+      'motor1Sprayer': 'Motor 1 (Sprayer)',
+      'motor2Irrigation': 'Motor 2 (Irrigation)',
     },
     'hi': {
       'chooseLanguage': 'अपनी पसंदीदा भाषा चुनें',
@@ -146,8 +162,10 @@ class AppLocalizations {
       'online': 'ऑनलाइन',
       'offline': 'ऑफ़लाइन',
       'bluetoothConnection': 'ब्लूटूथ कनेक्शन',
-      'bluetoothConnectPrompt': 'क्या आप HC-05 ब्लूटूथ डिवाइस से कनेक्ट करना चाहेंगे?',
-      'bluetoothNotConnected': 'ब्लूटूथ कनेक्ट नहीं है। अभी कनेक्ट करना चाहेंगे?',
+      'bluetoothConnectPrompt':
+          'क्या आप HC-05 ब्लूटूथ डिवाइस से कनेक्ट करना चाहेंगे?',
+      'bluetoothNotConnected':
+          'ब्लूटूथ कनेक्ट नहीं है। अभी कनेक्ट करना चाहेंगे?',
       'connectionFailed': 'कनेक्शन विफल',
       'success': 'सफलता',
       'connectNow': 'कनेक्ट',
@@ -214,6 +232,20 @@ class AppLocalizations {
       'prevention': 'रोकथाम',
       'treatment': 'उपचार',
       'noTreatmentDetails': 'उपचार विवरण उपलब्ध नहीं।',
+
+      // smart features
+      'smartRecommendation': 'स्मार्ट सिफारिश',
+      'waitingForWeather': 'मौसम डेटा की प्रतीक्षा में...',
+      'highHumidity': 'उच्च आर्द्रता: फंगल फैलने का उच्च जोखिम। मोटर 1 (स्प्रेयर) सक्रियण की सिफारिश।',
+      'extremeHeat': 'अत्यधिक गर्मी: मोटर 2 के माध्यम से सिंचाई बढ़ाएं।',
+      'lowHumidity': 'कम आर्द्रता: मिट्टी की नमी बनाए रखने के लिए सिंचाई सक्रिय करें।',
+      'conditionsStable': 'स्थितियां स्थिर: नियमित निगरानी जारी रखें।',
+      'activateMotor': 'सक्रिय करें',
+      'motorCommandSent': 'फील्ड नोड को कमांड भेजा गया',
+      'startingMotor': 'शुरू हो रहा है',
+      'stoppingMotor': 'बंद हो रहा है',
+      'motor1Sprayer': 'मोटर 1 (स्प्रेयर)',
+      'motor2Irrigation': 'मोटर 2 (सिंचाई)',
     },
     'gu': {
       'chooseLanguage': 'તમારી પસંદગીની ભાષા પસંદ કરો',
@@ -245,7 +277,8 @@ class AppLocalizations {
       'online': 'ઓનલાઇન',
       'offline': 'ઓફલાઇન',
       'bluetoothConnection': 'બ્લૂટૂથ કનેક્શન',
-      'bluetoothConnectPrompt': 'શું તમે HC-05 બ્લૂટૂથ ડિવાઇસ સાથે કનેક્ટ કરવા માંગો છો?',
+      'bluetoothConnectPrompt':
+          'શું તમે HC-05 બ્લૂટૂથ ડિવાઇસ સાથે કનેક્ટ કરવા માંગો છો?',
       'bluetoothNotConnected': 'બ્લૂટૂથ જોડાયેલ નથી. હમણાં કનેક્ટ કરશો?',
       'connectionFailed': 'કનેક્શન નિષ્ફળ',
       'success': 'સફળતા',
@@ -313,6 +346,20 @@ class AppLocalizations {
       'prevention': 'રોકથામ',
       'treatment': 'સારવાર',
       'noTreatmentDetails': 'સારવાર વિગત ઉપલબ્ધ નથી.',
+
+      // smart features
+      'smartRecommendation': 'સ્માર્ટ ભલામણ',
+      'waitingForWeather': 'હવામાન ડેટાની રાહ જોઈ રહ્યા છીએ...',
+      'highHumidity': 'ઊંચી ભેજ: ફંગલ ફેલાવાનું ઊંચું જોખમ. મોટર 1 (સ્પ્રેયર) સક્રિય કરવાની ભલામણ.',
+      'extremeHeat': 'અતિશય ગરમી: મોટર 2 દ્વારા સિંચાઈ વધારો.',
+      'lowHumidity': 'ઓછી ભેજ: માટીની ભેજ જાળવવા માટે સિંચાઈ સક્રિય કરો.',
+      'conditionsStable': 'સ્થિતિ સ્થિર: નિયમિત મોનિટરિંગ ચાલુ રાખો.',
+      'activateMotor': 'સક્રિય કરો',
+      'motorCommandSent': 'ફીલ્ડ નોડને કમાન્ડ મોકલ્યો',
+      'startingMotor': 'શરૂ થઈ રહ્યું છે',
+      'stoppingMotor': 'બંધ થઈ રહ્યું છે',
+      'motor1Sprayer': 'મોટર 1 (સ્પ્રેયર)',
+      'motor2Irrigation': 'મોટર 2 (સિંચાઈ)',
     },
     'mr': {
       'chooseLanguage': 'तुमची पसंतीची भाषा निवडा',
@@ -344,7 +391,8 @@ class AppLocalizations {
       'online': 'ऑनलाइन',
       'offline': 'ऑफलाइन',
       'bluetoothConnection': 'ब्लूटूथ कनेक्शन',
-      'bluetoothConnectPrompt': 'आपण HC-05 ब्लूटूथ डिव्हाइसला कनेक्ट करू इच्छिता?',
+      'bluetoothConnectPrompt':
+          'आपण HC-05 ब्लूटूथ डिव्हाइसला कनेक्ट करू इच्छिता?',
       'bluetoothNotConnected': 'ब्लूटूथ कनेक्ट नाही. आत्ता कनेक्ट कराल?',
       'connectionFailed': 'कनेक्शन अयशस्वी',
       'success': 'यशस्वी',
@@ -412,6 +460,20 @@ class AppLocalizations {
       'prevention': 'प्रतिबंध',
       'treatment': 'उपचार',
       'noTreatmentDetails': 'उपचार तपशील उपलब्ध नाहीत.',
+
+      // smart features
+      'smartRecommendation': 'स्मार्ट शिफारस',
+      'waitingForWeather': 'हवामान डेटाची प्रतीक्षा...',
+      'highHumidity': 'उच्च आर्द्रता: बुरशी पसरण्याचा उच्च धोका. मोटर 1 (स्प्रेयर) सक्रिय करण्याची शिफारस.',
+      'extremeHeat': 'अतिशय उष्णता: मोटर 2 द्वारे सिंचन वाढवा.',
+      'lowHumidity': 'कमी आर्द्रता: मातीची ओलावा राखण्यासाठी सिंचन सक्रिय करा.',
+      'conditionsStable': 'परिस्थिती स्थिर: नियमित निरीक्षण सुरू ठेवा.',
+      'activateMotor': 'सक्रिय करा',
+      'motorCommandSent': 'फील्ड नोडला कमांड पाठवला',
+      'startingMotor': 'सुरू होत आहे',
+      'stoppingMotor': 'बंद होत आहे',
+      'motor1Sprayer': 'मोटर 1 (स्प्रेयर)',
+      'motor2Irrigation': 'मोटर 2 (सिंचन)',
     },
   };
 
@@ -605,10 +667,34 @@ class AppLocalizations {
   String get treatment => _text('treatment');
 
   String get noTreatmentDetails => _text('noTreatmentDetails');
+
+  // Smart features
+  String get smartRecommendation => _text('smartRecommendation');
+
+  String get waitingForWeather => _text('waitingForWeather');
+
+  String get highHumidity => _text('highHumidity');
+
+  String get extremeHeat => _text('extremeHeat');
+
+  String get lowHumidity => _text('lowHumidity');
+
+  String get conditionsStable => _text('conditionsStable');
+
+  String get activateMotor => _text('activateMotor');
+
+  String get motorCommandSent => _text('motorCommandSent');
+
+  String get startingMotor => _text('startingMotor');
+
+  String get stoppingMotor => _text('stoppingMotor');
+
+  String get motor1Sprayer => _text('motor1Sprayer');
+
+  String get motor2Irrigation => _text('motor2Irrigation');
 }
 
-class AppLocalizationsDelegate
-    extends LocalizationsDelegate<AppLocalizations> {
+class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
   const AppLocalizationsDelegate();
 
   @override

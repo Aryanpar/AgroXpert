@@ -1,10 +1,8 @@
-// lib/screens/chat_history_screen.dart
-import 'dart:io';
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:path_provider/path_provider.dart' as path_provider;
+import '../utils/platform_utils.dart';
 import '../models/chat_history.dart';
 import '../services/chat_history_service.dart';
 import 'chat_ai_screen.dart';
@@ -75,21 +73,22 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
   Future<void> _backupAllChats() async {
     final app = AppLocalizations.of(context);
     try {
-      final file = await _historyService.exportToFile();
-      if (file != null && mounted) {
-        await Share.shareXFiles(
-          [XFile(file.path)],
-          text: 'AgroXpert Chat Backup',
-        );
+      final histories = await _historyService.getAllHistories();
+      final jsonData = {
+        'exportDate': DateTime.now().toIso8601String(),
+        'version': '1.0',
+        'histories': histories.map((h) => h.toJson()).toList(),
+      };
+      
+      await platformBackup(
+        'agroxpert_chat_backup_${DateTime.now().millisecondsSinceEpoch}.json',
+        jsonEncode(jsonData)
+      );
+
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(app.backupAll)),
         );
-      } else {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(app.chatError)),
-          );
-        }
       }
     } catch (e) {
       if (mounted) {
@@ -364,12 +363,12 @@ class _ChatHistoryScreenState extends State<ChatHistoryScreen> {
         'histories': [history.toJson()],
       };
       
-      final directory = await path_provider.getApplicationDocumentsDirectory();
-      final file = File('${directory.path}/chat_${history.id}_${DateTime.now().millisecondsSinceEpoch}.json');
-      await file.writeAsString(jsonEncode(jsonData));
+      await platformBackup(
+        'chat_${history.id}_${DateTime.now().millisecondsSinceEpoch}.json',
+        jsonEncode(jsonData)
+      );
       
       if (mounted) {
-        await Share.shareXFiles([XFile(file.path)]);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(app.backup)),
         );

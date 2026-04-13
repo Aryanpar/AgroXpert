@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
+import 'package:image_picker/image_picker.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
 
 class TFLiteService {
@@ -77,7 +78,7 @@ class TFLiteService {
     }
   }
 
-  Future<Map<String, dynamic>> runInference(File imageFile) async {
+  Future<Map<String, dynamic>> runInference(XFile imageFile) async {
     if (!_isModelLoaded || _interpreter == null) {
       final loaded = await loadModel();
       if (!loaded) {

@@ -1,9 +1,9 @@
-import 'dart:io';
-
+import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../utils/platform_utils.dart';
 import 'package:provider/provider.dart';
 import '../utils/language_provider.dart';
 import '../utils/app_localizations.dart';
@@ -18,7 +18,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final User? user = FirebaseAuth.instance.currentUser;
-  File? _imageFile;
+  XFile? _imageFile;
   bool _isUpdating = false;
   final TextEditingController _nameController = TextEditingController();
   bool _isEditingProfile = false;
@@ -43,7 +43,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (pickedFile != null) {
       setState(() {
-        _imageFile = File(pickedFile.path);
+        _imageFile = pickedFile;
       });
 
       await _updateProfilePhoto();
@@ -62,7 +62,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           .child("profile_photos")
           .child("${user!.uid}.jpg");
 
-      await storageRef.putFile(_imageFile!);
+      await platformUpload(storageRef, _imageFile!);
 
       // 2. Get the download URL
       final downloadUrl = await storageRef.getDownloadURL();
@@ -182,7 +182,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
         child: Column(
           children: [
             // Profile Avatar with Edit button
@@ -193,10 +193,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     radius: 60,
                     backgroundColor: Colors.green.shade100,
                     backgroundImage: _imageFile != null
-                        ? FileImage(_imageFile!)
+                        ? platformImageProvider(_imageFile!.path)
                         : (updatedUser?.photoURL != null
                             ? NetworkImage(updatedUser!.photoURL!)
-                            : null) as ImageProvider<Object>?,
+                            : null),
                     child: (updatedUser?.photoURL == null && _imageFile == null)
                         ? Text(
                             (updatedUser?.displayName != null &&

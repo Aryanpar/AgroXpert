@@ -2,8 +2,6 @@ Apple - Apple Scab
 Apple - Black Rot
 Apple - Cedar Apple Rust
 Apple - Healthy
-Background without Leaves
-Blueberry - Healthy
 Cherry - Powdery Mildew
 Cherry - Healthy
 Corn - Cercospora Leaf Spot (Gray Leaf Spot)
@@ -37,3 +35,6 @@ Tomato - Target Spot
 Tomato - Tomato Yellow Leaf Curl Virus
 Tomato - Tomato Mosaic Virus
 Tomato - Healthy
+
+Background without Leaves
+Blueberry - Healthy

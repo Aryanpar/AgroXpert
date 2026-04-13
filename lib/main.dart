@@ -13,18 +13,42 @@ import 'utils/language_provider.dart';
 
 void main() async {
   try {
+    print("🚀 Starting app initialization...");
     WidgetsFlutterBinding.ensureInitialized();
-    await dotenv.load(fileName: ".env");
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    
+    // Load .env with error handling
+    try {
+      await dotenv.load(fileName: ".env");
+      print("✅ Dotenv loaded successfully");
+    } catch (e) {
+      print("⚠️ Warning: .env file fail to load. Check pubspec assets. $e");
+    }
+
+    if (Firebase.apps.isEmpty) {
+      try {
+        print("🔥 Initializing Firebase...");
+        await Firebase.initializeApp(
+          options: DefaultFirebaseOptions.currentPlatform,
+        );
+        print("✅ Firebase initialized successfully");
+      } catch (e) {
+        print("❌ Firebase initialization error: $e");
+        // We continue anyway, as some parts might work or will handle null firebase later
+      }
+    } else {
+      print("ℹ️ Firebase already initialized");
+    }
+
+    print("🎬 Running app...");
     runApp(
       ChangeNotifierProvider(
         create: (context) => LanguageProvider(),
         child: const MyApp(),
       ),
     );
-  } catch (e) {
+  } catch (e, stackTrace) {
+    print("‼️ FATAL CRASH during main(): $e");
+    print(stackTrace);
     runApp(ErrorApp(error: e));
   }
 }
@@ -58,34 +82,33 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final languageProvider = Provider.of<LanguageProvider>(context);
     return MaterialApp(
-  title: 'AgroXpert Plus',
-  theme: ThemeData(
-    primaryColor: const Color(0xFF4CAF50),
-    scaffoldBackgroundColor: Colors.white,
-    visualDensity: VisualDensity.adaptivePlatformDensity,
-  ),
-  debugShowCheckedModeBanner: false,
+      title: 'AgroXpert Plus',
+      theme: ThemeData(
+        primaryColor: const Color(0xFF4CAF50),
+        scaffoldBackgroundColor: Colors.white,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      debugShowCheckedModeBanner: false,
 
-  // 🔥 Language switching works here
-  locale: languageProvider.currentLocale,
+      // 🔥 Language switching works here
+      locale: languageProvider.currentLocale,
 
-  supportedLocales: const [
-    Locale('en'),
-    Locale('hi'),
-    Locale('gu'),
-    Locale('mr'),
-  ],
+      supportedLocales: const [
+        Locale('en'),
+        Locale('hi'),
+        Locale('gu'),
+        Locale('mr'),
+      ],
 
-  localizationsDelegates: const [
-    AppLocalizationsDelegate(),
-    GlobalMaterialLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-  ],
+      localizationsDelegates: const [
+        AppLocalizationsDelegate(),
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
 
-  home: const AuthGate(),
-);
-
+      home: const AuthGate(),
+    );
   }
 }
 
