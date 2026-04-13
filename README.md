@@ -127,18 +127,6 @@ flutter run
 
 ---
 
-## 📸 Screenshots (Add Here)
-
-> Add your app UI screenshots for better presentation
-
----
-
-## 🎥 Demo (Optional)
-
-> Add demo video or YouTube link
-
----
-
 ## 🤝 Contributing
 
 Contributions are welcome!
